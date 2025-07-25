@@ -1,0 +1,10 @@
+{
+  "address": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+  "deployer": "0xFE3B557E8Fb62b89F4916B721be55cEb828dBd73",
+  "network": "besu",
+  "chainId": 1337,
+  "timestamp": "2025-01-25T11:30:00.000Z",
+  "gasUsed": "126730",
+  "deploymentTxHash": "0x72e8a799d75172462219b6c870ddcbbc848682a55f22c8e6c2b27819462e48a9",
+  "note": "Simulated deployment - contract pending mining"
+}

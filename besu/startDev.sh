@@ -83,6 +83,9 @@ if ! docker network ls | grep -q besu_network; then
   docker network create besu_network
 fi
 
+echo "Starting database services..."
+docker compose -f docker/docker-compose-database.yaml up -d
+
 echo "Starting bootnode"
 docker compose -f docker/docker-compose-bootnode.yaml up -d
 

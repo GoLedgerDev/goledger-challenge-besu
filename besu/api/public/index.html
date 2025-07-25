@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Besu Contract API Demo</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        .container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .endpoint {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .endpoint h3 {
+            color: #495057;
+            margin-top: 0;
+        }
+        .method {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            color: white;
+            font-size: 12px;
+        }
+        .method.get {
+            background: #28a745;
+        }
+        .method.post {
+            background: #007bff;
+        }
+        .code {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 14px;
+        }
+        .btn {
+            background: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .btn:hover {
+            background: #0056b3;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .status.success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .status.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .response {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            white-space: pre-wrap;
+            font-family: monospace;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .architecture {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        .component {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .component h4 {
+            margin-top: 0;
+        }
+        .network-info {
+            background: #17a2b8;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Besu Contract API Demo</h1>
+        
+        <div class="network-info">
+            <h3>📊 Network Status</h3>
+            <p>✅ Hyperledger Besu 4-node QBFT network running</p>
+            <p>✅ PostgreSQL database connected</p>
+            <p>✅ REST API running on port 3001</p>
+            <p>⚠️ Contract deployment pending (waiting for block mining)</p>
+        </div>
+
+        <div class="architecture">
+            <div class="component">
+                <h4>🔗 Hyperledger Besu</h4>
+                <p>4-node QBFT consensus</p>
+                <p>Ports: 8545-8548</p>
+                <p>Network ID: 1337</p>
+            </div>
+            <div class="component">
+                <h4>🗄️ PostgreSQL</h4>
+                <p>Contract data persistence</p>
+                <p>Transaction logging</p>
+                <p>Port: 5432</p>
+            </div>
+            <div class="component">
+                <h4>🌐 REST API</h4>
+                <p>Express.js server</p>
+                <p>Web3.js integration</p>
+                <p>Port: 3001</p>
+            </div>
+        </div>
+
+        <div class="endpoint">
+            <h3><span class="method get">GET</span> Health Check</h3>
+            <div class="code">curl http://localhost:3001/api/health</div>
+            <button class="btn" onclick="testEndpoint('/api/health', 'GET')">Test</button>
+            <div id="health-response" class="response" style="display:none;"></div>
+        </div>
+
+        <div class="endpoint">
+            <h3><span class="method get">GET</span> Contract Info</h3>
+            <div class="code">curl http://localhost:3001/api/contracts/simple-storage/info</div>
+            <button class="btn" onclick="testEndpoint('/api/contracts/simple-storage/info', 'GET')">Test</button>
+            <div id="info-response" class="response" style="display:none;"></div>
+        </div>
+
+        <div class="endpoint">
+            <h3><span class="method get">GET</span> Get Stored Value</h3>
+            <div class="code">curl http://localhost:3001/api/contracts/simple-storage</div>
+            <button class="btn" onclick="testEndpoint('/api/contracts/simple-storage', 'GET')">Test</button>
+            <div id="get-response" class="response" style="display:none;"></div>
+        </div>
+
+        <div class="endpoint">
+            <h3><span class="method post">POST</span> Set Value</h3>
+            <div class="code">curl -X POST http://localhost:3001/api/contracts/simple-storage \
+  -H "Content-Type: application/json" \
+  -d '{"value": 42}'</div>
+            <button class="btn" onclick="testSetValue()">Test with value 42</button>
+            <div id="set-response" class="response" style="display:none;"></div>
+        </div>
+
+        <div class="endpoint">
+            <h3><span class="method get">GET</span> Transaction History</h3>
+            <div class="code">curl http://localhost:3001/api/contracts/simple-storage/history</div>
+            <button class="btn" onclick="testEndpoint('/api/contracts/simple-storage/history', 'GET')">Test</button>
+            <div id="history-response" class="response" style="display:none;"></div>
+        </div>
+
+        <div style="margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 8px;">
+            <h3>📋 Project Features</h3>
+            <ul>
+                <li>✅ Hyperledger Besu 4-node private network with QBFT consensus</li>
+                <li>✅ PostgreSQL database integration for contract data persistence</li>
+                <li>✅ REST API with Express.js and Web3.js</li>
+                <li>✅ Smart contract interaction (SimpleStorage)</li>
+                <li>✅ Health monitoring and error handling</li>
+                <li>✅ Docker containerization</li>
+                <li>⚠️ Contract deployment (pending mining solution)</li>
+            </ul>
+        </div>
+
+        <div style="margin-top: 20px; text-align: center; color: #6c757d;">
+            <p>🔧 Built with Hyperledger Besu + PostgreSQL + Express.js + Web3.js</p>
+        </div>
+    </div>
+
+    <script>
+        async function testEndpoint(path, method = 'GET', body = null) {
+            const responseId = path.replace(/[/\-]/g, '') + '-response';
+            const responseDiv = document.getElementById(responseId);
+            
+            try {
+                const options = {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                };
+                
+                if (body) {
+                    options.body = JSON.stringify(body);
+                }
+                
+                const response = await fetch(`http://localhost:3001${path}`, options);
+                const data = await response.json();
+                
+                responseDiv.style.display = 'block';
+                responseDiv.textContent = JSON.stringify(data, null, 2);
+                responseDiv.className = 'response ' + (response.ok ? 'success' : 'error');
+            } catch (error) {
+                responseDiv.style.display = 'block';
+                responseDiv.textContent = 'Error: ' + error.message;
+                responseDiv.className = 'response error';
+            }
+        }
+
+        function testSetValue() {
+            testEndpoint('/api/contracts/simple-storage', 'POST', { value: 42 });
+        }
+
+        // Auto-load health check on page load
+        window.onload = function() {
+            testEndpoint('/api/health', 'GET');
+        };
+    </script>
+</body>
+</html>
