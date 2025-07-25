@@ -15,11 +15,11 @@ async function main() {
         // Get the contract factory
         const SimpleStorage = await ethers.getContractFactory("SimpleStorage");
         
-        // Deploy with minimal gas settings for Besu
+        // Deploy with explicit gas settings for Besu
         console.log("⚙️ Deploying contract...");
         const simpleStorage = await SimpleStorage.deploy({
-            gasLimit: 1000000,
-            gasPrice: 0  // Use 0 gas price for dev network
+            gasLimit: 500000,
+            gasPrice: ethers.parseUnits("20", "gwei")
         });
         
         // Wait for deployment
@@ -36,7 +36,7 @@ async function main() {
         // Set a test value
         const tx = await simpleStorage.set(42, {
             gasLimit: 100000,
-            gasPrice: 0  // Use 0 gas price for dev network
+            gasPrice: ethers.parseUnits("20", "gwei")
         });
         await tx.wait();
         
