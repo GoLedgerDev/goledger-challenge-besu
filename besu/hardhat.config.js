@@ -9,10 +9,8 @@ module.exports = {
       accounts: [
         "8f2a55949038a9610f50fb23b5883af3b4ecb3c3bb792cbcefbd1542c692be63",
       ],
-      gas: 4700000,
-      gasPrice: 1000000000, // 1 gwei
-      chainId: 1337,
-      timeout: 60000,
+      gas: "auto",
+      gasPrice: "auto",
     },
   },
 };

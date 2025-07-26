@@ -1,0 +1,33 @@
+# Binários compilados
+besu-go-api
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Arquivos de teste
+*.test
+
+# Arquivos temporários do Go
+*.tmp
+*.swp
+*.swo
+
+# Dependências
+vendor/
+
+# Logs
+*.log
+
+# Arquivos do IDE
+.vscode/
+.idea/
+*.iml
+
+# Variáveis de ambiente
+.env.local
+.env.production
+
+# Cache do módulo Go
+go.sum.backup
