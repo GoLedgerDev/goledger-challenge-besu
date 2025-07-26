@@ -4,8 +4,23 @@ const contractService = require('../services/contractService');
 const dbService = require('../services/dbService');
 const { validateSetValue } = require('../middleware/validation');
 
-// GET /api/contracts/simple-storage
-// Get current stored value
+/**
+ * @swagger
+ * /api/contracts/simple-storage:
+ *   get:
+ *     tags: [SimpleStorage]
+ *     summary: Get stored value
+ *     description: Retrieve the current value stored in the SimpleStorage contract
+ *     responses:
+ *       200:
+ *         description: Current stored value
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/StorageValue'
+ *       500:
+ *         $ref: '#/components/responses/InternalError'
+ */
 router.get('/simple-storage', async (req, res) => {
   try {
     const value = await contractService.getStoredValue();
@@ -27,8 +42,31 @@ router.get('/simple-storage', async (req, res) => {
   }
 });
 
-// POST /api/contracts/simple-storage
-// Set new value
+/**
+ * @swagger
+ * /api/contracts/simple-storage:
+ *   post:
+ *     tags: [SimpleStorage]
+ *     summary: Set stored value
+ *     description: Set a new value in the SimpleStorage contract
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/SetValueRequest'
+ *     responses:
+ *       200:
+ *         description: Transaction successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/TransactionResponse'
+ *       400:
+ *         $ref: '#/components/responses/BadRequest'
+ *       500:
+ *         $ref: '#/components/responses/InternalError'
+ */
 router.post('/simple-storage', validateSetValue, async (req, res) => {
   try {
     const { value } = req.body;
@@ -64,8 +102,39 @@ router.post('/simple-storage', validateSetValue, async (req, res) => {
   }
 });
 
-// GET /api/contracts/simple-storage/history
-// Get transaction history
+/**
+ * @swagger
+ * /api/contracts/simple-storage/history:
+ *   get:
+ *     tags: [SimpleStorage]
+ *     summary: Get transaction history
+ *     description: Retrieve transaction history for the SimpleStorage contract
+ *     parameters:
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *           minimum: 1
+ *           maximum: 100
+ *         description: Number of transactions to return
+ *       - in: query
+ *         name: offset
+ *         schema:
+ *           type: integer
+ *           default: 0
+ *           minimum: 0
+ *         description: Number of transactions to skip
+ *     responses:
+ *       200:
+ *         description: Transaction history
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/TransactionHistory'
+ *       500:
+ *         $ref: '#/components/responses/InternalError'
+ */
 router.get('/simple-storage/history', async (req, res) => {
   try {
     const { limit = 10, offset = 0 } = req.query;
@@ -94,8 +163,23 @@ router.get('/simple-storage/history', async (req, res) => {
   }
 });
 
-// GET /api/contracts/simple-storage/info
-// Get contract information
+/**
+ * @swagger
+ * /api/contracts/simple-storage/info:
+ *   get:
+ *     tags: [SimpleStorage]
+ *     summary: Get contract information
+ *     description: Retrieve contract deployment information and network details
+ *     responses:
+ *       200:
+ *         description: Contract information
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ContractInfo'
+ *       500:
+ *         $ref: '#/components/responses/InternalError'
+ */
 router.get('/simple-storage/info', async (req, res) => {
   try {
     const info = await contractService.getContractInfo();

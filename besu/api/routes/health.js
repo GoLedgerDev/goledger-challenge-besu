@@ -3,7 +3,23 @@ const router = express.Router();
 const { Web3 } = require('web3');
 const { Pool } = require('pg');
 
-// GET /api/health
+/**
+ * @swagger
+ * /api/health:
+ *   get:
+ *     tags: [Health]
+ *     summary: System health check
+ *     description: Check the status of all system components including Besu network, database, and contracts
+ *     responses:
+ *       200:
+ *         description: System health status
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/HealthResponse'
+ *       500:
+ *         $ref: '#/components/responses/InternalError'
+ */
 router.get('/', async (req, res) => {
   const health = {
     status: 'ok',

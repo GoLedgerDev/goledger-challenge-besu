@@ -2,6 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpecs = require('./config/swagger');
 require('dotenv').config();
 
 const contractRoutes = require('./routes/contracts');
@@ -18,6 +20,15 @@ app.use(morgan('combined'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Swagger documentation
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs, {
+  customCss: '.swagger-ui .topbar { display: none }',
+  customSiteTitle: 'Besu Contract API Documentation',
+  swaggerOptions: {
+    persistAuthorization: true,
+  }
+}));
+
 // Serve static files
 app.use(express.static('public'));
 
@@ -25,18 +36,46 @@ app.use(express.static('public'));
 app.use('/api/health', healthRoutes);
 app.use('/api/contracts', contractRoutes);
 
-// Root endpoint
+/**
+ * @swagger
+ * /:
+ *   get:
+ *     tags: [Health]
+ *     summary: API root endpoint
+ *     description: Get API information and available endpoints
+ *     responses:
+ *       200:
+ *         description: API information
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: 'Besu Contract API'
+ *                 version:
+ *                   type: string
+ *                   example: '1.0.0'
+ *                 endpoints:
+ *                   type: object
+ *                 documentation:
+ *                   type: string
+ *                   example: '/api-docs'
+ */
 app.get('/', (req, res) => {
   res.json({
     message: 'Besu Contract API',
     version: '1.0.0',
+    documentation: '/api-docs',
     endpoints: {
       health: '/api/health',
       contracts: '/api/contracts',
       simpleStorage: {
         get: 'GET /api/contracts/simple-storage',
         set: 'POST /api/contracts/simple-storage',
-        history: 'GET /api/contracts/simple-storage/history'
+        history: 'GET /api/contracts/simple-storage/history',
+        info: 'GET /api/contracts/simple-storage/info'
       }
     }
   });
