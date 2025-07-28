@@ -2,6 +2,12 @@
 
 A complete blockchain development environment featuring Hyperledger Besu with QBFT consensus, PostgreSQL integration, and dual API implementations.
 
+> **📋 Challenge Deliverables**
+> - ✅ **Source Code**: Public GitHub repository (forked from original)
+> - ✅ **Documentation**: Complete README with run instructions
+> - ✅ **Architecture**: Detailed system architecture in [ARCHITECTURE.md](./ARCHITECTURE.md)
+> - ✅ **APIs**: Dual implementation (Go + Node.js) with full functionality
+
 ## 🏗️ Architecture
 
 ```
@@ -30,43 +36,90 @@ A complete blockchain development environment featuring Hyperledger Besu with QB
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Docker & Docker Compose
-- Go 1.23+
-- Node.js 16+ (for Node.js API)
-- PostgreSQL client (optional)
+- **Docker & Docker Compose** (required)
+- **Hyperledger Besu** 25.7.0+ (download from [official releases](https://github.com/hyperledger/besu/releases))
+- **Go** 1.23+ (for Go API)
+- **Node.js** 16+ (for Node.js API)
+- **Git** (for repository management)
 
-### 1. Start Infrastructure
+### Step-by-Step Setup
+
+#### 1. Clone and Setup Repository
 ```bash
-# Start Besu network and database
+# Fork this repository on GitHub first, then clone your fork
+git clone https://github.com/YOUR_USERNAME/goledger-challenge-besu.git
+cd goledger-challenge-besu/besu
+
+# Make startup script executable
+chmod +x startDev.sh
+```
+
+#### 2. Start Complete Infrastructure
+```bash
+# This script will:
+# - Start 4-node Besu QBFT network
+# - Launch PostgreSQL database
+# - Deploy smart contracts
+# - Configure all services
 ./startDev.sh
-
-# Verify network is running
-docker ps | grep besu
 ```
 
-### 2. Deploy Smart Contract
+**Expected Output:**
+```
+Starting QBFT Besu local network
+✅ Database services started
+✅ Bootnode started  
+✅ Network nodes connected
+✅ Smart contract deployed: 0x42699A7612A82f1d9C36148af9C77354759b210b
+```
+
+#### 3. Verify Infrastructure
 ```bash
-# Quick deployment
-node scripts/deploy-web3.js
+# Check all containers are running
+docker ps | grep besu
+
+# Test network connectivity
+curl -X POST --data '{"jsonrpc":"2.0","method":"net_peerCount","params":[],"id":1}' http://localhost:8545
 ```
 
-### 3. Start APIs
+#### 4. Start APIs
 
-**Go API:**
+**Option A: Go API (Recommended)**
 ```bash
 cd go-api
+
+# Install dependencies and run
 go mod tidy
 go run main.go
-# Access: http://localhost:8080
+
+# API will be available at: http://localhost:8080
+# Test: curl http://localhost:8080/api/status
 ```
 
-**Node.js API:**
+**Option B: Node.js API (with Swagger UI)**
 ```bash
 cd api
+
+# Install dependencies and run
 npm install
 npm start
-# Access: http://localhost:3001
-# Swagger: http://localhost:3001/api-docs
+
+# API available at: http://localhost:3001
+# Swagger UI: http://localhost:3001/api-docs
+```
+
+#### 5. Quick API Test
+```bash
+# Test GET operation
+curl http://localhost:8080/api/get
+
+# Test SET operation  
+curl -X POST http://localhost:8080/api/set \
+  -H "Content-Type: application/json" \
+  -d '{"value": 42}'
+
+# Verify the change
+curl http://localhost:8080/api/get
 ```
 
 ## 📋 API Endpoints
