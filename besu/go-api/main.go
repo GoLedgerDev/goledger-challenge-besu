@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"net/http"
 	"os"
 
 	"besu-go-api/internal/blockchain"
@@ -11,6 +12,146 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
+
+const swaggerSpec = `openapi: 3.0.3
+info:
+  title: Besu Go API
+  description: A REST API for interacting with Hyperledger Besu smart contracts and PostgreSQL database
+  version: 1.0.0
+  contact:
+    name: API Support
+    url: http://www.swagger.io/support
+    email: support@swagger.io
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+
+paths:
+  /:
+    get:
+      summary: API Information
+      description: Get basic information about the API and available endpoints
+      responses:
+        '200':
+          description: API information
+
+  /api/set:
+    post:
+      summary: Set Value
+      description: Set a new value in the smart contract
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - value
+              properties:
+                value:
+                  type: integer
+                  format: int64
+                  example: 42
+      responses:
+        '200':
+          description: Value set successfully
+
+  /api/get:
+    get:
+      summary: Get Value
+      description: Get the current value from the blockchain
+      responses:
+        '200':
+          description: Current value retrieved
+
+  /api/sync:
+    post:
+      summary: Sync Value
+      description: Synchronize blockchain value to the database
+      responses:
+        '200':
+          description: Synchronization completed
+
+  /api/check:
+    get:
+      summary: Check Synchronization
+      description: Compare database and blockchain values
+      responses:
+        '200':
+          description: Synchronization status
+
+  /api/history:
+    get:
+      summary: Get History
+      description: Get value change history from database
+      parameters:
+        - name: limit
+          in: query
+          description: Number of records to return
+          required: false
+          schema:
+            type: integer
+            default: 10
+        - name: offset
+          in: query
+          description: Number of records to skip
+          required: false
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: History retrieved
+
+  /api/status:
+    get:
+      summary: System Status
+      description: Get system status including network, database, and contract information
+      responses:
+        '200':
+          description: System status
+`
+
+const swaggerUIHTML = `
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Besu Go API - Swagger UI</title>
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui.css" />
+    <style>
+        html { box-sizing: border-box; overflow: -moz-scrollbars-vertical; overflow-y: scroll; }
+        *, *:before, *:after { box-sizing: inherit; }
+        body { margin:0; background: #fafafa; }
+    </style>
+</head>
+<body>
+    <div id="swagger-ui"></div>
+    <script src="https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui-bundle.js"></script>
+    <script src="https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui-standalone-preset.js"></script>
+    <script>
+        window.onload = function() {
+            const ui = SwaggerUIBundle({
+                url: '/swagger/spec',
+                dom_id: '#swagger-ui',
+                deepLinking: true,
+                presets: [
+                    SwaggerUIBundle.presets.apis,
+                    SwaggerUIStandalonePreset
+                ],
+                plugins: [
+                    SwaggerUIBundle.plugins.DownloadUrl
+                ],
+                layout: "StandaloneLayout"
+            });
+        };
+    </script>
+</body>
+</html>
+`
 
 func main() {
 	if err := godotenv.Load(); err != nil {
@@ -110,6 +251,22 @@ func setupRouter(handler *handlers.Handler) *gin.Engine {
 		c.Next()
 	})
 
+	// Swagger documentation
+	router.GET("/swagger/index.html", func(c *gin.Context) {
+		c.Header("Content-Type", "text/html")
+		c.String(200, swaggerUIHTML)
+	})
+	
+	router.GET("/swagger/spec", func(c *gin.Context) {
+		c.Header("Content-Type", "application/x-yaml")
+		c.String(200, swaggerSpec)
+	})
+
+	// Redirect /swagger to /swagger/index.html
+	router.GET("/swagger", func(c *gin.Context) {
+		c.Redirect(http.StatusMovedPermanently, "/swagger/index.html")
+	})
+
 	api := router.Group("/api")
 	{
 		api.POST("/set", handler.SetValue)
@@ -122,8 +279,9 @@ func setupRouter(handler *handlers.Handler) *gin.Engine {
 
 	router.GET("/", func(c *gin.Context) {
 		c.JSON(200, gin.H{
-			"message": "Besu Go API",
-			"version": "1.0.0",
+			"message":       "Besu Go API",
+			"version":       "1.0.0",
+			"documentation": "/swagger/index.html",
 			"endpoints": gin.H{
 				"set":     "POST /api/set - Set new value in smart contract",
 				"get":     "GET /api/get - Get current value from blockchain",

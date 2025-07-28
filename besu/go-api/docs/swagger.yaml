@@ -1,0 +1,380 @@
+openapi: 3.0.3
+info:
+  title: Besu Go API
+  description: A REST API for interacting with Hyperledger Besu smart contracts and PostgreSQL database
+  version: 1.0.0
+  contact:
+    name: API Support
+    url: http://www.swagger.io/support
+    email: support@swagger.io
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+
+tags:
+  - name: Core Operations
+    description: Core blockchain and database operations
+  - name: Monitoring
+    description: System monitoring and health check endpoints
+
+paths:
+  /:
+    get:
+      summary: API Information
+      description: Get basic information about the API and available endpoints
+      tags:
+        - Monitoring
+      responses:
+        '200':
+          description: API information
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Besu Go API"
+                  version:
+                    type: string
+                    example: "1.0.0"
+                  documentation:
+                    type: string
+                    example: "/swagger/index.html"
+                  endpoints:
+                    type: object
+
+  /api/set:
+    post:
+      summary: Set Value
+      description: Set a new value in the smart contract
+      tags:
+        - Core Operations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - value
+              properties:
+                value:
+                  type: integer
+                  format: int64
+                  description: The value to set in the smart contract
+                  example: 42
+      responses:
+        '200':
+          description: Value set successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Value set successfully"
+                  data:
+                    type: object
+                    properties:
+                      value:
+                        type: string
+                        example: "42"
+                      tx_hash:
+                        type: string
+                        example: "0xabc123..."
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/get:
+    get:
+      summary: Get Value
+      description: Get the current value from the blockchain
+      tags:
+        - Core Operations
+      responses:
+        '200':
+          description: Current value retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      value:
+                        type: string
+                        example: "42"
+                      source:
+                        type: string
+                        example: "blockchain"
+                      timestamp:
+                        type: string
+                        format: date-time
+                        example: "2025-07-26T14:30:00Z"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/sync:
+    post:
+      summary: Sync Value
+      description: Synchronize blockchain value to the database
+      tags:
+        - Core Operations
+      responses:
+        '200':
+          description: Synchronization completed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Sync completed successfully"
+                  data:
+                    type: object
+                    properties:
+                      blockchain_value:
+                        type: string
+                        example: "42"
+                      database_updated:
+                        type: boolean
+                        example: true
+                      sync_time:
+                        type: string
+                        format: date-time
+                        example: "2025-07-26T14:30:00Z"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/check:
+    get:
+      summary: Check Synchronization
+      description: Compare database and blockchain values
+      tags:
+        - Core Operations
+      responses:
+        '200':
+          description: Synchronization status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      database_value:
+                        type: string
+                        example: "42"
+                      blockchain_value:
+                        type: string
+                        example: "42"
+                      in_sync:
+                        type: boolean
+                        example: true
+                      last_sync_time:
+                        type: string
+                        format: date-time
+                        example: "2025-07-26T14:25:00Z"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/history:
+    get:
+      summary: Get History
+      description: Get value change history from database
+      tags:
+        - Core Operations
+      parameters:
+        - name: limit
+          in: query
+          description: Number of records to return
+          required: false
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+            maximum: 100
+        - name: offset
+          in: query
+          description: Number of records to skip
+          required: false
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+      responses:
+        '200':
+          description: History retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      records:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                              example: 1
+                            value:
+                              type: integer
+                              example: 42
+                            tx_hash:
+                              type: string
+                              example: "0xabc123..."
+                            block_number:
+                              type: integer
+                              example: 12345
+                            created_at:
+                              type: string
+                              format: date-time
+                              example: "2025-07-26T14:30:00Z"
+                      total:
+                        type: integer
+                        example: 25
+                      limit:
+                        type: integer
+                        example: 10
+                      offset:
+                        type: integer
+                        example: 0
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/status:
+    get:
+      summary: System Status
+      description: Get system status including network, database, and contract information
+      tags:
+        - Monitoring
+      responses:
+        '200':
+          description: System status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      network:
+                        type: object
+                        properties:
+                          chain_id:
+                            type: string
+                            example: "1337"
+                          block_number:
+                            type: integer
+                            example: 12345
+                          account:
+                            type: string
+                            example: "0xFE3B557E8Fb62b89F4916B721be55cEb828dBd73"
+                          balance:
+                            type: string
+                            example: "80000000000000000000000"
+                      database:
+                        type: object
+                        properties:
+                          status:
+                            type: string
+                            example: "connected"
+                          latest_value:
+                            type: string
+                            example: "42"
+                          last_updated:
+                            type: string
+                            format: date-time
+                            example: "2025-07-26T14:30:00Z"
+                      contract:
+                        type: object
+                        properties:
+                          address:
+                            type: string
+                            example: "0x42699A7612A82f1d9C36148af9C77354759b210b"
+                          status:
+                            type: string
+                            example: "configured"
+                      timestamp:
+                        type: string
+                        format: date-time
+                        example: "2025-07-26T14:30:00Z"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    Error:
+      type: object
+      required:
+        - success
+        - error
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: string
+          example: "Description of what went wrong"

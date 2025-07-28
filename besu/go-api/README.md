@@ -11,6 +11,7 @@ A REST API written in Go for interacting with Hyperledger Besu smart contracts a
 - Complete PostgreSQL integration
 - Comprehensive error handling
 - RESTful API design
+- **Swagger UI Documentation**: Interactive API documentation at `/swagger/index.html`
 
 ## 🏗️ Architecture
 
@@ -68,6 +69,8 @@ make run
 | `GET` | `/api/history` | Get value change history |
 | `GET` | `/api/status` | Get system status |
 | `GET` | `/` | API information |
+| `GET` | `/swagger/index.html` | **Swagger UI Documentation** |
+| `GET` | `/swagger/spec` | OpenAPI 3.0 specification (YAML) |
 
 ## 🔧 Usage Examples
 
@@ -101,6 +104,15 @@ curl "http://localhost:8080/api/history?limit=5&offset=0"
 ### Get Status
 ```bash
 curl http://localhost:8080/api/status
+```
+
+### Access Swagger Documentation
+```bash
+# Open in browser
+http://localhost:8080/swagger/index.html
+
+# Get OpenAPI spec
+curl http://localhost:8080/swagger/spec
 ```
 
 ## 📊 Response Examples
@@ -267,6 +279,19 @@ All endpoints return consistent error responses:
 - **go-ethereum**: Ethereum client library
 - **lib/pq**: PostgreSQL driver
 - **godotenv**: Environment variable loading
+
+## 📖 Documentation
+
+The API includes comprehensive Swagger UI documentation available at:
+- **Interactive Docs**: http://localhost:8080/swagger/index.html
+- **OpenAPI Spec**: http://localhost:8080/swagger/spec
+
+The documentation provides:
+- Complete endpoint descriptions
+- Request/response schemas
+- Example payloads
+- Error response formats
+- Interactive testing interface
 
 ---
 
