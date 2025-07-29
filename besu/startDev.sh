@@ -83,8 +83,11 @@ if ! docker network ls | grep -q besu_network; then
   docker network create besu_network
 fi
 
+echo "Starting database services..."
+docker compose -f docker/docker-compose-database.yaml up -d
+
 echo "Starting bootnode"
-docker-compose -f docker/docker-compose-bootnode.yaml up -d
+docker compose -f docker/docker-compose-bootnode.yaml up -d
 
 # Retrieve bootnode enode address
 max_retries=30
@@ -94,11 +97,9 @@ retry_count=0
 while [ $retry_count -lt $max_retries ]; do
   export ENODE=$(curl -X POST --data '{"jsonrpc":"2.0","method":"net_enode","params":[],"id":1}' http://127.0.0.1:8545 | jq -r '.result')
 
-  if [ -n "$ENODE" ]; then
-    if [ "$ENODE" != "null" ]; then
-      echo "ENODE retrieved successfully."
-      break
-    fi
+  if [ -n "$ENODE" ] && [ "$ENODE" != "null" ]; then
+    echo "ENODE retrieved successfully."
+    break
   else
     echo "Failed to retrieve ENODE. Retrying in $retry_delay seconds..."
     sleep $retry_delay
@@ -120,7 +121,7 @@ echo $E_ADDRESS
 sed "s/<ENODE>/enode:\/\/$E_ADDRESS/g" docker/templates/docker-compose-nodes.yaml > docker/docker-compose-nodes.yaml
 
 echo "Starting nodes"
-docker-compose -f docker/docker-compose-nodes.yaml up -d
+docker compose -f docker/docker-compose-nodes.yaml up -d
 
 echo "============================="
 echo "Network started successfully!"
